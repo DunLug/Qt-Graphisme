@@ -909,7 +909,8 @@ WARN_LOGFILE           =
 INPUT                  = animatedwidget.cpp \
                          animatedwidget.h \
                          drawable.h drawable.cpp \
-                         background.h background.cpp
+                         background.h background.cpp \
+                         drawableelem.h drawableelem.cpp
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

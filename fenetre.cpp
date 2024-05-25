@@ -1,6 +1,8 @@
 #include "fenetre.h"
 #include "personnage.h"
 
+/// Construit la fenêtre et initialise un personnage pour la démonstration
+/// \param parent Le parent de la fenêtre, ici nécéssairement nullptr
 Fenetre::Fenetre(QWidget *parent)
     : QMainWindow{parent}
 {

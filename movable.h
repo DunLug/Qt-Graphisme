@@ -10,8 +10,8 @@ public:
     Movable(int x, int y, Background *parent);
 
     void positionner(int x, int y);
-    int get_pos_x() const;
-    int get_pos_y() const;
+    int get_pos_x() const {return pos_x;}
+    int get_pos_y() const {return pos_y;}
 
 
 

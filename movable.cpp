@@ -1,11 +1,18 @@
 #include "movable.h"
 #include <QDebug>
 
+/// Crée un élément qui peut se déplacer dans l'écran
+/// \param x la position x initiale de l'élément
+/// \param y la position y initiale de l'élément
+/// \param parent Le fond de fenêtre dans lequel dessiner l'élément. Celui-ci avertit le widget lors d'un redimensionnement de la fenêtre
 Movable::Movable(int x, int y, Background* parent):DrawableElem(x, y, parent)
 {
     this->parent = parent;
 }
 
+/// Déplace l'élément à une nouvelle position
+/// \param x La nouvelle position x
+/// \param y La nouvelle position y
 void Movable::positionner(int x, int y)
 {
     if (parent)
@@ -22,7 +29,6 @@ void Movable::positionner(int x, int y)
         geom.setHeight(sizeHint().height()*factor_y);
         correct_margins(geom);
         this->move(geom.topLeft());
-        qDebug() << "Old_zone = " << old_zone << ", geom = " << geom;
         pos_x = x;
         pos_y = y;
         parent->update(old_zone);

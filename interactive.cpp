@@ -1,6 +1,10 @@
 #include "interactive.h"
 
 
+/// Construit un widget qui peut gérer des interactions clavier
+/// \param x la position x initiale
+/// \param y la position y initiale
+/// \param parent Le fond de fenêtre dans lequel dessiner le widget
 Interactive::Interactive(int x, int y, Background* parent):Movable(x, y, parent)
 {
     setFocus();
@@ -9,12 +13,15 @@ Interactive::Interactive(int x, int y, Background* parent):Movable(x, y, parent)
     timer.setSingleShot(false);
 }
 
-
+/// Modifie le délai entre deux répétitions de touches, lorsque la touche reste enfoncée
+/// \param delay_ms Le délai entre deux appels de key_pressed ou arrow_pressed, lorsque la touche reste enfoncée
 void Interactive::set_repetition_delay(int delay_ms)
 {
     timer.setInterval(delay_ms);
 }
 
+/// Méthode héritée de QWidget, qui est appelée lors de l'appui d'une touche par l'utilisateur
+/// \param event Objet contenant les informations sur l'appui de la touche, notamment la touche actuellement utilisée
 void Interactive::keyPressEvent(QKeyEvent* event)
 {
     switch (event->key())
@@ -54,6 +61,8 @@ void Interactive::keyPressEvent(QKeyEvent* event)
     }
 }
 
+/// Méthode héritée de QWidget, qui est appelée automatiquement lorsque la touche est relâchée
+/// \param event Objet contenant les données sur l'événement, notamment la touche relâchée
 void Interactive::keyReleaseEvent(QKeyEvent* event)
 {
     switch (event->key())
@@ -101,6 +110,9 @@ void Interactive::keyReleaseEvent(QKeyEvent* event)
 }
 
 
+/// Gère la répétition des touches lorsque la touche reste enfoncée, en réappelant régulièrement les méthodes correspondantes
+/// \see Interactive::arrow_pressed(char arrow)
+/// \see Interactive::key_pressed(std::string key)
 void Interactive::_manage_timeout()
 {
     if (is_arrow_pressed)

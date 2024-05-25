@@ -16,7 +16,6 @@ public:
     int base_height() const;
 
     void resizeEvent(QResizeEvent* event);
-    void paintEvent(QPaintEvent *event){qDebug() << event->rect();};
 
 private:
     const QSize base_size = QSize(1280, 600);

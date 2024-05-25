@@ -22,7 +22,6 @@ void Movable::positionner(int x, int y)
         geom.setHeight(sizeHint().height()*factor_y);
         correct_margins(geom);
         this->move(geom.topLeft());
-        qDebug() << "Old_zone = " << old_zone << ", geom = " << geom;
         pos_x = x;
         pos_y = y;
         parent->update(old_zone);

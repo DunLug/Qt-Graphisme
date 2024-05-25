@@ -7,6 +7,11 @@
 #include <QDebug>
 #endif
 
+/// \brief Construit un élément graphique capable de se déplacer régulièrement
+/// \param x la position x de départ de l'élément
+/// \param y la position y de départ de l'élément
+/// \param parent le fond de fenêtre dans lequel dessiner l'élément
+/// Si la macro ANIMATION est définie, le déplacement d'un RegularMove se fait de manière fluide, sinon, l'image est redessinée directement à la nouvelle position.
 RegularMove::RegularMove(int x, int y, Background* parent) : Movable(x, y, parent)
 {
 #ifdef ANIMATION
@@ -20,12 +25,19 @@ RegularMove::RegularMove(int x, int y, Background* parent) : Movable(x, y, paren
     timer->start();
 }
 
+/// Slot utilisé pour mettre à jour la position de manière régulière. Elle appelle la fonction abstraite update_pos qui doit être redéfinie pour calculer la nouvelle position et appeler la méthode positionner.
+/// \see Movable::positionner(int, int)
+/// \see RegularMove::positionner(int, int)
 void RegularMove::_update_pos()
 {
     update_pos();
 }
 
 #ifdef ANIMATION
+/// Redéfinition de la méthode Movable::positionner(int, int), qui permet de mettre à jour la position de manière fluide et animée.
+/// Cette redéfinition n'est présente que dans le cas où la macro ANIMATION est définie, et nécessite l'installation de la librairie QStateMachine
+/// Dans le cas contraire, l'appel à positionner(int, int) est redirigée vers Movable::positionner(int, int)
+/// \see Movable::positionner(int, int)
 void RegularMove::positionner(int x, int y)
 {
     if (parent)
@@ -52,11 +64,26 @@ void RegularMove::positionner(int x, int y)
     }
 }
 
+/// Ajoute une animation pour le déplacement
+/// \param start le numéro de la première frame de l'animation
+/// \param end le numéro de la dernière frame de l'animation
+/// \param loop le nombre de boucles d'animation à effectuer (-1 pour une animation infinie)
+/// \param duration la durée d'une boucle
+/// \param pattern le format du nom de fichier à utiliser pour rechercher les images de l'animation, le numéro de frame est indiqué par le placeholder %1
 void RegularMove::add_animation(int start, int end, int loop, int duration, std::string pattern)
 {
     add_animation(new QState(machine), start, end, loop, duration, pattern);
 }
 
+/// \brief Ajoute une animation pour le déplacement
+/// Ajoute une animation pour le déplacement en fournissant explicitement le QState associé. Cela permet notamment de connecter le lancement du QState à la réception d'un signal, comme up(), down(), left() ou right()
+/// \param state L'état dans lequel la machine d'état doit se trouver pour produire l'animation
+/// \param start le numéro de la première frame de l'animation
+/// \param end le numéro de la dernière frame de l'animation
+/// \param loop le nombre de boucles d'animation à effectuer (-1 pour une animation infinie)
+/// \param duration la durée d'une boucle
+/// \param pattern le format du nom de fichier à utiliser pour rechercher les images de l'animation, le numéro de frame est indiqué par le placeholder %1
+/// \see RegularMove::init_animation(std::string nom, int nb_frames)
 void RegularMove::add_animation(QState* state, int start, int end, int loop, int duration, std::string pattern)
 {
     if (!first_state)
@@ -72,6 +99,8 @@ void RegularMove::add_animation(QState* state, int start, int end, int loop, int
     state->assignProperty(this, "basename", QString::fromStdString(pattern));
 }
 
+/// Lance l'affichage d'une animation
+/// \param initial L'état à utiliser pour l'animation. Si la valeur est à nullptr, la première animation créée est utilisée
 void RegularMove::start_animation(QState *initial)
 {
     if (!initial)
@@ -87,33 +116,44 @@ void RegularMove::start_animation(QState *initial)
     animation.start();
 }
 
+/// Donne le numéro de la frame courante
+/// \return le numéro de la frame
 int RegularMove::frame()
 {
     return m_frame;
 }
 
+/// Modifie le numéro de la frame courante et modifie l'image en conséquence
+/// \param frame Le numéro de la frame à utiliser
 void RegularMove::setFrame(int frame)
 {
     m_frame = frame;
     set_background_image(m_basename.arg(m_frame).toStdString());
 }
 
+/// Donne le format des noms de fichiers à utiliser pour l'animation
+/// \return Le format des noms de fichiers à utiliser pour l'animation
 QString RegularMove::_basename() const
 {
     return m_basename;
 }
 
+/// Modifie le format des noms de fichiers à utiliser pour l'animation
+/// \param basename Le format des noms de fichiers à utiliser pour l'animation
 void RegularMove::_setBasename(QString basename)
 {
     this->m_basename = basename;
 }
 
-
+/// Donne la direction courante du widget
+/// \return La direction courante du widget parmi les possibilités "UP", "DOWN", "RIGHT", "LEFT"
 std::string RegularMove::direction() const
 {
     return dir;
 }
 
+/// Modifie la direction du widget et transmets des signaux pour adapter les animations en conséquence
+/// \param direction La direction du widget parmi les possibilités "UP", "DOWN", "RIGHT", "LEFT"
 void RegularMove::set_direction(std::string direction)
 {
     if (direction == "UP")
@@ -135,6 +175,9 @@ void RegularMove::set_direction(std::string direction)
     dir = direction;
 }
 
+/// Méthode initialisant les différentes animations possibles du personnage PacMan
+/// Crée quatre états (st_dr, st_ga, st_ba, st_ha) correspondants aux animations de Pacman pour ouvrir et fermer la bouche dans différentes directions
+/// Ajoute également une animation supplémentaire, st_go, qui est obtenue à la réception d'un signal collision() dans n'importe quel état de départ de Pacman, et qui l'affiche tournant sur lui-même
 void RegularMove::init_animation_perso()
 {
     init_animation("pacman", 4);
@@ -146,12 +189,18 @@ void RegularMove::init_animation_perso()
     add_animation(st_go, 1, 4, 3, 500, "pacman_go_%1.png");
 }
 
+/// Méthode initialisant les différentes animations possibles des fantômes Pacman
+/// Crée quatre états (st_dr, st_ga, st_ba, st_ha) correspondant aux animations des fantomes lorsqu'ils se déplacent dans l'une des quatre directions
+/// \param nom Le nom du fantôme utilisé, parmi pinky, blinky, clyde et inky
 void RegularMove::init_animation_ennemi(std::string nom)
 {
     init_animation(nom, 2);
 }
 
-
+/// Méthode permettant d'initialiser les animations d'un RegularMove dans quatre directions possibles
+/// Le format des noms de fichiers doit être de la forme {nom}_{dir}_{frame}.png, avec dir = {dr, ga, ba, ha}.
+/// \param nom Le nom du personnage à animer (utilisé dans le nom de fichier)
+/// \param nb_frames Le nombre de frames à utiliser (les fichiers ayant des frames allant de 1 à nb_frames, sans remplissage par des zéros
 void RegularMove::init_animation(std::string nom, int nb_frames)
 {
     st_dr = new QState(machine);
